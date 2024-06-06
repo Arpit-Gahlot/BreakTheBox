@@ -24,6 +24,9 @@ public class GameRunner {
 
         //Create a GamePanel object and add it to the window
         GamePanel gamePanel = new GamePanel();
+
+        gamePanel.setIgnoreRepaint(true);
+
         window.add(gamePanel);
 
         //causes the window to be resized as per the size and layout of its subcomponents

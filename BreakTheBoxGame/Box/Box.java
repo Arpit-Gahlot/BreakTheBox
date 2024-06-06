@@ -14,8 +14,6 @@ public class Box {
     public int xCoordinate;
     public int yCoordinate;
 
-    public JLabel label = new JLabel();
-
     public Box(GamePanel gp) {
         this.gp = gp;
         yCoordinate = - gp.tileSize;
@@ -47,13 +45,5 @@ public class Box {
         else if (boxHealthbar == 3) {
             boxColor = Color.GREEN;
         }
-    }
-
-    public void showHealthBar() {
-        label.setText("" + boxHealthbar);
-        label.setFont(new Font("MV Boli", Font.PLAIN, 5));
-        label.setBounds(xCoordinate, yCoordinate, gp.tileSize, gp.tileSize);
-        label.setForeground(Color.BLACK);
-        gp.add(label);
     }
 }

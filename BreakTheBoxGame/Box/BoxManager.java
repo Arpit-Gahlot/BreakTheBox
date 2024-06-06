@@ -1,17 +1,12 @@
 package Box;
 
 import Main.GamePanel;
-import Turret.CannonBall;
-import Turret.Turret;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class BoxManager {
 
     GamePanel gp;
-
     public BoxQueue currentBoxes;
 
     public BoxManager(GamePanel gp) {
@@ -26,17 +21,18 @@ public class BoxManager {
 
     public void update() {
 
-        BoxQueue.Node currentNode = currentBoxes.head;
-        while (currentNode != null) {
+        if (!gp.cChecker.collisionHappened) {
+            BoxQueue.Node currentNode = currentBoxes.head;
+            while (currentNode != null) {
 
-            currentNode.data.colorManager();
-            currentNode.data.showHealthBar();
-            currentNode.data.yCoordinate = currentNode.data.yCoordinate + 2;
-            currentNode = currentNode.next;
-        }
+                currentNode.data.colorManager();
+                currentNode.data.yCoordinate = currentNode.data.yCoordinate + 1;
+                currentNode = currentNode.next;
+            }
 
-        if (gp.gameTimer % 90 == 0) {
-            createBox();
+            if (gp.gameTimer % 60 == 0) {
+                createBox();
+            }
         }
     }
 
@@ -66,7 +62,7 @@ public class BoxManager {
         }
 
         //instance variables
-        Node head;
+        public Node head;
         int count;
         Node tail;
 

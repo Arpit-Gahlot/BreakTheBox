@@ -5,9 +5,9 @@
 
 package Main;
 
+import Collision.CollisionChecker;
 import Turret.Turret;
 import Box.BoxManager;
-//import ObstacleDetails.Obstacles;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,7 +45,7 @@ public class GamePanel extends JPanel implements Runnable {
     public BoxManager boxManager = new BoxManager(this);
 
     //instantiate the collision checker class
-    //public CollisionChecker cChecker = new CollisionChecker(this);
+    public CollisionChecker cChecker = new CollisionChecker(this);
 
     //Constructor
     public GamePanel() {
@@ -85,10 +85,26 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (delta >= 1) {
                 update();
-                repaint();
+
+                Graphics myGraphics = getGraphics();
+
+                //Graphics2D extends the Graphics class and provides more coordinate control, etc compared to Graphics.
+                Graphics2D myGraphics2D = (Graphics2D) myGraphics;
+
+                myGraphics2D.setColor(Color.WHITE);
+                myGraphics2D.fillRect(0,0, screenWidth, screenHeight);
+
+                turret.draw(myGraphics2D);
+
+                boxManager.draw(myGraphics2D);
+
+                //dispose of this graphics context and release any system resources that it is using
+                myGraphics2D.dispose();
+
                 delta--;
                 gameTimer++;
             }
+
         }
     }
 
@@ -97,6 +113,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         turret.update();
         boxManager.update();
+        cChecker.checkForCollision();
 
     }
 
@@ -104,14 +121,6 @@ public class GamePanel extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
 
         super.paintComponent(g);
-        //Graphics2D extends the Graphics class and provides more coordinate control, etc compared to Graphics.
-        Graphics2D g2 = (Graphics2D) g;
 
-        turret.draw(g2);
-
-        boxManager.draw(g2);
-
-        //dispose of this graphics context and release any system resources that it is using
-        g2.dispose();
     }
 }

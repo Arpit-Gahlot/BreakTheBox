@@ -7,7 +7,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-//import java.util.ArrayList;
+import java.util.ArrayList;
 
 public class Turret {
 
@@ -23,10 +23,11 @@ public class Turret {
     public BufferedImage backgroundImage;
     public String direction;
     public CannonBallQueue currentCannonBalls;
-    //public ArrayList<Rectangle> turretHitbox;
-    public boolean collisionHappened;
+    public ArrayList<Rectangle> turretHitbox;
+    public boolean canMoveLeft;
+    public boolean canMoveRight;
 
-    GamePanel gp;
+    public GamePanel gp;
     KeyHandler keyH;
 
     //constructor
@@ -50,13 +51,14 @@ public class Turret {
         nextShotTimer = 0;
         direction = "still";
         currentCannonBalls = new CannonBallQueue();
-        collisionHappened = false;
+        turretHitbox = new ArrayList<>();
+        canMoveLeft = true;
+        canMoveRight = true;
 
     }
 
     //Assigns the background image to the "backgroundImage" variable
     public void getBackgroundImage() {
-
     }
 
     //Assign the images of the different turret parts to the respective variables
@@ -78,53 +80,60 @@ public class Turret {
     //This method is called 60 times each second and handles all the movements of the Turret
     public void update() {
 
-        if (keyH.moveLeft) {
-            direction = "movingLeft";
-            turretHorizontalPosition = turretHorizontalPosition - shiftSpeed;
-        }
-        else if (keyH.moveRight) {
-            direction = "movingRight";
-            turretHorizontalPosition = turretHorizontalPosition + shiftSpeed;
-        }
-        else {
-            direction = "still";
-        }
-
-        //Turret will be ready again after 0.5 seconds
-        if (keyH.shoot && isNextShotReady) {
-            if (nextShotTimer >= 30) {
-                isShooting = true;
-                shoot();
-                nextShotTimer = 0;
-                shootAnimationTimer = 0;
-                isNextShotReady = false;
+        if (!gp.cChecker.collisionHappened) {
+            if (keyH.moveLeft) {
+                if (canMoveLeft) {
+                    direction = "movingLeft";
+                    turretHorizontalPosition = turretHorizontalPosition - shiftSpeed;
+                }
+            } else if (keyH.moveRight) {
+                if (canMoveRight) {
+                    direction = "movingRight";
+                    turretHorizontalPosition = turretHorizontalPosition + shiftSpeed;
+                }
+            } else {
+                direction = "still";
             }
-        }
 
-        if (nextShotTimer >= 30) {
-            isNextShotReady = true;
-        }
-
-        //Turret position returns back to normal
-        if (isShooting && shootAnimationTimer >= 10) {
-            isShooting = false;
-            shootAnimationTimer = 0;
-        }
-
-        CannonBallQueue.Node currentCannonBall = currentCannonBalls.head;
-
-        while (currentCannonBall != null) {
-            if (currentCannonBalls.head != null) {
-                if (currentCannonBalls.head.data.yCoordinate < -48) {
-                    currentCannonBalls.removeCannonBall();
+            //Turret will be ready again after 0.5 seconds
+            if (keyH.shoot && isNextShotReady) {
+                if (nextShotTimer >= 30) {
+                    isShooting = true;
+                    shoot();
+                    nextShotTimer = 0;
+                    shootAnimationTimer = 0;
+                    isNextShotReady = false;
                 }
             }
-            currentCannonBall.data.update();
-            currentCannonBall = currentCannonBall.next;
-        }
 
-        shootAnimationTimer = shootAnimationTimer + 1;
-        nextShotTimer = nextShotTimer + 1;
+            if (nextShotTimer >= 30) {
+                isNextShotReady = true;
+            }
+
+            //Turret position returns back to normal
+            if (isShooting && shootAnimationTimer >= 10) {
+                isShooting = false;
+                shootAnimationTimer = 0;
+            }
+
+            CannonBallQueue.Node currentCannonBall = currentCannonBalls.head;
+
+            while (currentCannonBall != null) {
+
+                if (currentCannonBalls.head != null) {
+                    if (currentCannonBalls.head.data.yCoordinate < -48) {
+                        currentCannonBalls.removeCannonBall();
+                    }
+                }
+                currentCannonBall.data.update();
+                currentCannonBall = currentCannonBall.next;
+            }
+
+            gp.cChecker.checkTurretCollision();
+
+            shootAnimationTimer = shootAnimationTimer + 1;
+            nextShotTimer = nextShotTimer + 1;
+        }
     }
 
     //Draws the images (the game is a sequence of images) on the screen
@@ -169,7 +178,7 @@ public class Turret {
         }
 
         //instance variables
-        Node head;
+        public Node head;
         int count;
         Node tail;
 
