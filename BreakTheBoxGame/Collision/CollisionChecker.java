@@ -1,3 +1,7 @@
+/**
+ * This class handles the collisions for the BreakTheBox game
+ */
+
 package Collision;
 
 import Main.GamePanel;
@@ -10,12 +14,14 @@ public class CollisionChecker {
     public GamePanel gp;
     public boolean collisionHappened;
 
+    //constructor
     public CollisionChecker(GamePanel gp) {
 
         this.gp = gp;
         collisionHappened = false;
     }
 
+    //Method to check that the turret doesn't go off-screen
     public void checkTurretCollision() {
 
         if (gp.turret.turretHorizontalPosition - gp.tileSize <= 0 ) {
@@ -33,6 +39,7 @@ public class CollisionChecker {
         }
     }
 
+    //Method that checks for all the collisions in the game
     public void checkForCollision() {
 
         BoxQueue.Node currentBox = gp.boxManager.currentBoxes.head;
@@ -56,28 +63,52 @@ public class CollisionChecker {
                 if (((cannonBallRightX >= boxLeftXCoordinate) && (cannonBallRightX <= boxRightXCoordinate))
                         || ((cannonBallLeftX <= boxRightXCoordinate) && (cannonBallLeftX >= boxLeftXCoordinate))){
 
+                    //If the cannonBall and box touch, it's a hit
                     if (boxBottomYCoordinate >= cannonBallTopY) {
                         currentBox.data.boxHealthbar --;
 
                         if (currentCannonBall == gp.turret.currentCannonBalls.head) {
                             gp.turret.currentCannonBalls.removeCannonBall();
+                            currentCannonBall = gp.turret.currentCannonBalls.head;
                         }
                         else {
                             previousCannonBall.next = currentCannonBall.next;
+                            currentCannonBall = previousCannonBall.next;
                         }
                     }
                 }
 
-                previousCannonBall = currentCannonBall;
-                currentCannonBall = currentCannonBall.next;
+                if (currentCannonBall != null) {
+
+                    previousCannonBall = currentCannonBall;
+                    currentCannonBall = currentCannonBall.next;
+                }
             }
 
-            //check if a box reaches the bottom
+            if ((boxLeftXCoordinate <= gp.turret.turretHorizontalPosition + 2 * gp.tileSize)
+                    && (boxRightXCoordinate >= gp.turret.turretHorizontalPosition - gp.tileSize)) {
+
+                if ((boxLeftXCoordinate <= gp.turret.turretHorizontalPosition + gp.tileSize)
+                        && (boxRightXCoordinate >= gp.turret.turretHorizontalPosition)) {
+
+                    if (boxBottomYCoordinate >= gp.turret.turretDepth - gp.tileSize) {
+                        collisionHappened = true;
+                        break;
+                    }
+                }
+                if (boxBottomYCoordinate >= gp.turret.turretDepth + 15) {
+                    collisionHappened = true;
+                    break;
+                }
+            }
+
+            //check if a box reaches the bottom, this will finish the game
             if (boxBottomYCoordinate >= gp.screenHeight) {
                 collisionHappened = true;
                 break;
             }
 
+            //if a box health reaches 0, it is destroyed
             if (currentBox.data.boxHealthbar <= 0) {
                 if (currentBox == gp.boxManager.currentBoxes.head) {
                     gp.boxManager.currentBoxes.removeBox();
@@ -85,6 +116,7 @@ public class CollisionChecker {
                 else {
                     previousBox.next = currentBox.next;
                 }
+                gp.playerScore ++;
             }
 
             previousBox = currentBox;

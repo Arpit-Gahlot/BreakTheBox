@@ -1,3 +1,7 @@
+/**
+ * This class handles all the workings of the Turret
+ */
+
 package Turret;
 
 import Main.GamePanel;
@@ -7,7 +11,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class Turret {
 
@@ -20,10 +23,8 @@ public class Turret {
     public int shootAnimationTimer;
     public int nextShotTimer;
     public BufferedImage turretLeft, turretMid, turretRight, turretTop, turretShootMid, turretShootTop;
-    public BufferedImage backgroundImage;
     public String direction;
     public CannonBallQueue currentCannonBalls;
-    public ArrayList<Rectangle> turretHitbox;
     public boolean canMoveLeft;
     public boolean canMoveRight;
 
@@ -51,14 +52,9 @@ public class Turret {
         nextShotTimer = 0;
         direction = "still";
         currentCannonBalls = new CannonBallQueue();
-        turretHitbox = new ArrayList<>();
         canMoveLeft = true;
         canMoveRight = true;
 
-    }
-
-    //Assigns the background image to the "backgroundImage" variable
-    public void getBackgroundImage() {
     }
 
     //Assign the images of the different turret parts to the respective variables
@@ -118,6 +114,7 @@ public class Turret {
 
             CannonBallQueue.Node currentCannonBall = currentCannonBalls.head;
 
+            //if the cannonBalls go off-screen, remove them
             while (currentCannonBall != null) {
 
                 if (currentCannonBalls.head != null) {
@@ -150,7 +147,6 @@ public class Turret {
             shootPositionTop = turretTop;
         }
 
-        //g.drawImage(backgroundImage, 0, 0, gp.screenWidth, gp.screenHeight, null);
         g.drawImage(turretLeft, turretHorizontalPosition - gp.tileSize, turretDepth, gp.tileSize, gp.tileSize, null);
         g.drawImage(turretRight, turretHorizontalPosition + gp.tileSize, turretDepth, gp.tileSize, gp.tileSize, null);
         g.drawImage(shootPositionMid, turretHorizontalPosition, turretDepth, gp.tileSize, gp.tileSize, null);
@@ -163,13 +159,14 @@ public class Turret {
         }
     }
 
+    //Method to add a new cannonBall to the queue
     public void shoot() {
-        currentCannonBalls.addCannonBall(new CannonBall(turretHorizontalPosition, turretDepth - 2 * gp.tileSize));
+        currentCannonBalls.addCannonBall(new CannonBall(turretHorizontalPosition, turretDepth - gp.tileSize));
     }
 
     public class CannonBallQueue {
 
-        //A Node subclass where every Node corresponds to a single obstacle
+        //A Node subclass where every Node corresponds to a single cannonBall
         public class Node {
             public CannonBall data;
             public Node next = null;
@@ -189,7 +186,7 @@ public class Turret {
             tail = null;
         }
 
-        //adds the obstacle to the back of the queue
+        //adds the cannonBall to the back of the queue
         public void addCannonBall(CannonBall CannonBallToAdd) {
 
             Node n = new Node();
@@ -211,10 +208,9 @@ public class Turret {
                 tail = tail.next;
             }
             count = count + 1;
-
         }
 
-        //removes the obstacle from the front of the queue
+        //removes the cannonBall from the front of the queue
         public void removeCannonBall() {
 
             head = head.next;

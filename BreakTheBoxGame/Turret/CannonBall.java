@@ -1,3 +1,7 @@
+/**
+ * This class handles the working of the cannonBalls which are launched from the turret
+ */
+
 package Turret;
 
 import Main.GamePanel;
@@ -9,11 +13,13 @@ import java.io.IOException;
 
 public class CannonBall {
 
+    //instance variables
     public int xCoordinate;
     public int yCoordinate;
     public BufferedImage cannonBall;
     public int speed;
 
+    //constructor
     public CannonBall(int xCoordinate, int yCoordinate) {
 
         this.xCoordinate = xCoordinate;
@@ -23,6 +29,7 @@ public class CannonBall {
         getCannonBallImage();
     }
 
+    //Method to assign the cannonBall image to the cannonBall variable
     public void getCannonBallImage(){
 
         try {
@@ -33,10 +40,12 @@ public class CannonBall {
         }
     }
 
+    //Method to make the cannonBalls move up
     public void update() {
         yCoordinate = yCoordinate - 5;
     }
 
+    //Method to draw the cannonBall
     public void draw(Graphics g, GamePanel gp) {
         g.drawImage(cannonBall, xCoordinate, yCoordinate, gp.tileSize, gp.tileSize, null);
     }

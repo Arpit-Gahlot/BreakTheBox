@@ -1,3 +1,7 @@
+/**
+ * This class handles the logic of all the boxes in the game
+ */
+
 package Box;
 
 import Main.GamePanel;
@@ -6,19 +10,23 @@ import java.awt.*;
 
 public class BoxManager {
 
+    //instance variables
     GamePanel gp;
     public BoxQueue currentBoxes;
 
+    //constructor
     public BoxManager(GamePanel gp) {
 
         this.gp = gp;
         currentBoxes = new BoxQueue();
     }
 
+    //Method to add a box to the current boxes queue
     public void createBox() {
         currentBoxes.addBox(new Box(gp));
     }
 
+    //This method is called 60 times each second and handles the functioning of the boxes
     public void update() {
 
         if (!gp.cChecker.collisionHappened) {
@@ -30,12 +38,13 @@ public class BoxManager {
                 currentNode = currentNode.next;
             }
 
-            if (gp.gameTimer % 60 == 0) {
+            if (gp.gameTimer % 90 == 0) {
                 createBox();
             }
         }
     }
 
+    //Method to draw the boxes on the GamePanel
     public void draw(Graphics g) {
 
         BoxQueue.Node currentNode = currentBoxes.head;
@@ -53,7 +62,7 @@ public class BoxManager {
     }
     public class BoxQueue {
 
-        //A Node subclass where every Node corresponds to a single obstacle
+        //A Node subclass where every Node corresponds to a single box
         public class Node {
             public Box data;
             public Node next = null;
@@ -73,7 +82,7 @@ public class BoxManager {
             tail = null;
         }
 
-        //adds the obstacle to the back of the queue
+        //adds the box to the back of the queue
         public void addBox(Box box) {
 
             Node n = new Node();
@@ -95,10 +104,9 @@ public class BoxManager {
                 tail = tail.next;
             }
             count = count + 1;
-
         }
 
-        //removes the obstacle from the front of the queue
+        //removes the box from the front of the queue
         public void removeBox() {
 
             head = head.next;

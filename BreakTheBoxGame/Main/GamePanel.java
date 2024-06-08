@@ -9,10 +9,12 @@ import Collision.CollisionChecker;
 import Turret.Turret;
 import Box.BoxManager;
 
-import javax.swing.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
-public class GamePanel extends JPanel implements Runnable {
+public class GamePanel extends Canvas implements Runnable {
 
     //Screen Settings
     final int originalTileSize = 16; //16x16 tile
@@ -26,6 +28,8 @@ public class GamePanel extends JPanel implements Runnable {
     public final int maxScreenRow = 12; //the number of rows on the screen
     public final int screenWidth = tileSize * maxScreenColumn; //the actual width of the screen (768 pixels)
     public final int screenHeight = tileSize * maxScreenRow; //the actual height of the screen (576 pixels)
+    public BufferedImage backgroundImage;
+    public int playerScore;
 
     public int gameTimer = 0;
 
@@ -51,10 +55,11 @@ public class GamePanel extends JPanel implements Runnable {
     public GamePanel() {
 
         this.setPreferredSize(new Dimension(screenWidth, screenHeight)); //set the size of the screen
-        this.setDoubleBuffered(true); //All the drawing will be done in an off-screen paint buffer (higher performance)
         this.addKeyListener(keyH); //Add the key handler to the Game panel
         this.setFocusable(true); //Game Panel can be focused to receive key input
-        this.setBackground(Color.WHITE);
+        this.setBackground(Color.BLACK);
+        getBackgroundImage(); //assigns the background image to the backgroundImage variable
+        playerScore = 0;
     }
 
     //starts the game events/sequence
@@ -75,6 +80,7 @@ public class GamePanel extends JPanel implements Runnable {
         double delta = 0;
         long lastTime = System.nanoTime();
         long currentTime;
+        createBufferStrategy(2); //All the drawing will be done in an off-screen paint buffer (higher performance)
 
         while (gameThread != null) {
 
@@ -85,42 +91,102 @@ public class GamePanel extends JPanel implements Runnable {
 
             if (delta >= 1) {
                 update();
-
-                Graphics myGraphics = getGraphics();
-
-                //Graphics2D extends the Graphics class and provides more coordinate control, etc compared to Graphics.
-                Graphics2D myGraphics2D = (Graphics2D) myGraphics;
-
-                myGraphics2D.setColor(Color.WHITE);
-                myGraphics2D.fillRect(0,0, screenWidth, screenHeight);
-
-                turret.draw(myGraphics2D);
-
-                boxManager.draw(myGraphics2D);
-
-                //dispose of this graphics context and release any system resources that it is using
-                myGraphics2D.dispose();
-
+                draw();
                 delta--;
                 gameTimer++;
             }
-
         }
     }
 
     //update information such as player positions
     public void update() {
 
-        turret.update();
-        boxManager.update();
-        cChecker.checkForCollision();
+        if (keyH.gameStart) {
+
+            turret.update();
+            boxManager.update();
+            cChecker.checkForCollision();
+        }
+    }
+
+    //draw the objects
+    public void draw() {
+
+        Graphics myGraphics = getBufferStrategy().getDrawGraphics();
+
+        if (!keyH.gameStart) {
+
+            startGameScreen(myGraphics);
+        }
+        else {
+
+            //Graphics2D extends the Graphics class and provides more coordinate control, etc compared to Graphics.
+            Graphics2D myGraphics2D = (Graphics2D) myGraphics;
+
+            myGraphics2D.drawImage(backgroundImage, 0, 0, screenWidth, screenHeight, null);
+            turret.draw(myGraphics2D);
+            boxManager.draw(myGraphics2D);
+
+            if (cChecker.collisionHappened) {
+                gameOver(myGraphics);
+            }
+            else {
+                showScore(myGraphics2D);
+            }
+
+            //dispose of this graphics context and release any system resources that it is using
+            myGraphics2D.dispose();
+        }
+
+        getBufferStrategy().show();
 
     }
 
-    //draw screen with the updated information
-    public void paintComponent(Graphics g) {
+    //Method that handles what will be shown initially as the game starts
+    public void startGameScreen(Graphics g) {
 
-        super.paintComponent(g);
+        g.setColor(Color.YELLOW);
+        g.setFont(new Font("Ink Free", Font.BOLD, 75));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Break The Box", (screenWidth - metrics.stringWidth("Break The Box"))/2, screenHeight/2 - tileSize);
 
+        g.setColor(Color.cyan);
+        g.setFont(new Font("Ink Free", Font.BOLD, 30));
+        metrics = getFontMetrics(g.getFont());
+        g.drawString("Spacebar to shoot, left and right arrow keys to move", (screenWidth - metrics.stringWidth("Spacebar to shoot, left and right arrow keys to move"))/2, screenHeight/2 + tileSize);
+
+        g.setColor(Color.white);
+        g.setFont(new Font("Ink Free", Font.BOLD, 40));
+        metrics = getFontMetrics(g.getFont());
+        g.drawString("Press any key to start", (screenWidth - metrics.stringWidth("Press any key to start"))/2, screenHeight/2 + 3 * tileSize);
+    }
+
+    //This method is used for displaying the score during the game
+    public void showScore(Graphics g) {
+
+        g.setColor(Color.white);
+        g.setFont(new Font("Ink Free", Font.BOLD, 25));
+        g.drawString("Score: " + playerScore , screenWidth - 3 * tileSize + 20, tileSize);
+    }
+
+    //This method pops up the "Game Over" text as soon as a box reaches the bottom or touches the turret
+    public void gameOver(Graphics g) {
+
+        g.setColor(Color.white);
+        g.setFont(new Font("Ink Free", Font.BOLD, 75));
+        g.drawString("Game Over", screenWidth/2 - 4 * tileSize, screenHeight/2);
+
+        g.setFont(new Font("Ink Free", Font.BOLD, 50));
+        g.drawString("Your score is: " + playerScore, screenWidth/2 - 4 * tileSize + 20, screenHeight/2 + 2 * tileSize);
+    }
+
+    //Assigns the background image to the "backgroundImage" variable
+    public void getBackgroundImage() {
+        try {
+            backgroundImage = ImageIO.read(getClass().getResourceAsStream("/Main/BreakTheBoxbg.png"));
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
